@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Feature List Schema",
+  "description": "Agent Relay 功能清单 JSON Schema",
+  "type": "object",
+  "required": ["project", "version", "features"],
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "项目名称"
+    },
+    "version": {
+      "type": "string",
+      "description": "功能清单版本"
+    },
+    "created_at": {
+      "type": "string",
+      "description": "创建时间"
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/feature"
+      }
+    }
+  },
+  "definitions": {
+    "feature": {
+      "type": "object",
+      "required": [
+        "id", "category", "title", "description",
+        "priority", "steps", "test_criteria", "passes"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^F[0-9]{3}$",
+          "description": "功能 ID，格式 F001-F999"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "setup", "core", "ui", "auth", "data",
+            "api", "test", "deploy", "a11y", "perf"
+          ],
+          "description": "功能分类"
+        },
+        "title": {
+          "type": "string",
+          "description": "功能标题"
+        },
+        "description": {
+          "type": "string",
+          "description": "功能描述"
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "description": "优先级，1 最高"
+        },
+        "steps": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "实现步骤"
+        },
+        "test_criteria": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "测试标准"
+        },
+        "passes": {
+          "type": "boolean",
+          "description": "是否通过测试"
+        },
+        "dependencies": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "依赖的功能 ID 列表"
+        },
+        "notes": {
+          "type": "string",
+          "description": "备注"
+        }
+      }
+    }
+  }
+}
