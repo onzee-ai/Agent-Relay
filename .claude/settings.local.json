@@ -6,7 +6,13 @@
       "Bash(git commit:*)",
       "Bash(wc:*)",
       "Bash(python3:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(claude plugin --help:*)",
+      "Bash(claude plugin install --help:*)",
+      "Bash(claude plugin)",
+      "Bash(claude plugins:*)",
+      "Bash(# 先恢复:*)",
+      "Bash(chmod:*)"
     ]
   }
 }
