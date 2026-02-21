@@ -19,7 +19,7 @@ else
 fi
 
 RELAY_MARKER="Agent Relay"
-RELAY_VERSION="1.0.0"
+RELAY_VERSION="1.0.1"
 
 set -euo pipefail
 
