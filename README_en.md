@@ -31,6 +31,19 @@ bash /path/to/agent-relay/install.sh --uninstall /path/to/your-project
 bash /path/to/agent-relay/install.sh --check /path/to/your-project
 ```
 
+## Command Line Tool (relay.sh)
+
+After installation, you can use `relay.sh` to manage multiple projects:
+
+```bash
+relay.sh              # Interactive mode
+relay.sh list         # List all projects
+relay.sh add <path>  # Add a project
+relay.sh switch <name> # Switch project
+relay.sh status       # View project status
+relay.sh progress     # View development progress
+```
+
 ## Usage
 
 ### First Initialization
@@ -63,6 +76,7 @@ Claude automatically: Read progress → Select feature → Implement → Test �
 | File | Description |
 |------|-------------|
 | `install.sh` | Install/uninstall/check script |
+| `relay.sh` | Command line tool (optional) |
 | `relay-instructions.md` | CLAUDE.md template with complete relay workflow |
 | `SPEC.md` | Requirements document (generated during init, needs user confirmation) |
 | `feature-list.json` | Feature list (generated after requirements confirmed) |
