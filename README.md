@@ -20,7 +20,7 @@
 bash /path/to/agent-relay/install.sh /path/to/your-project
 
 # 或远程安装
-curl -sL https://raw.githubusercontent.com/your-repo/agent-relay/main/install.sh | bash -s /path/to/your-project
+curl -sL https://raw.githubusercontent.com/onzee-ai/Agent-Relay/main/install.sh | bash -s /path/to/your-project
 ```
 
 ## 卸载

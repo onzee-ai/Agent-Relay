@@ -16,7 +16,7 @@ Solving the context loss problem in long AI Agent conversations. Enables continu
 bash /path/to/agent-relay/install.sh /path/to/your-project
 
 # Or remote installation
-curl -sL https://raw.githubusercontent.com/your-repo/agent-relay/main/install.sh | bash -s /path/to/your-project
+curl -sL https://raw.githubusercontent.com/onzee-ai/Agent-Relay/main/install.sh | bash -s /path/to/your-project
 ```
 
 ## Uninstall

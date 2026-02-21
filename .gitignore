@@ -5,7 +5,7 @@ venv/
 .env
 dist/
 build/
-.nexte/
+.next/
 .DS_Store
 *.swp
 *.swo

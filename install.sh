@@ -6,21 +6,24 @@ set -euo pipefail
 #   bash install.sh /path/to/your-project    # 安装
 #   bash install.sh --uninstall /path/to/your-project  # 卸载
 #   bash install.sh --check /path/to/your-project  # 检查状态
+#   bash install.sh --update /path/to/your-project  # 更新到最新版本
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RELAY_MARKER="Agent Relay"
+RELAY_VERSION="1.0.0"
 
 usage() {
-  echo "Agent Relay - 一键安装"
+  echo "Agent Relay - 一键安装 (v$RELAY_VERSION)"
   echo ""
   echo "用法:"
   echo "  bash install.sh <path>              # 安装到指定项目"
   echo "  bash install.sh --uninstall <path> # 卸载"
   echo "  bash install.sh --check <path>     # 检查安装状态"
+  echo "  bash install.sh --update <path>    # 更新到最新版本"
   echo ""
   echo "示例:"
   echo "  bash install.sh /path/to/your-project"
-  echo "  curl -sL https://raw.githubusercontent.com/your-repo/agent-relay/main/install.sh | bash -s /path/to/your-project"
+  echo "  curl -sL https://raw.githubusercontent.com/onzee-ai/Agent-Relay/main/install.sh | bash -s /path/to/your-project"
 }
 
 check_installed() {
@@ -94,13 +97,12 @@ do_uninstall() {
   # 备份原文件
   cp "$git_root/CLAUDE.md" "$git_root/CLAUDE.md.bak"
 
-  # 移除 Agent Relay 相关内容
-  # 使用 sed 删除从 "# Agent Relay" 到下一个 "#" 之前的内容
-  sed -i '' "/$RELAY_MARKER/,/^#/{ /^#.*$/!d; }" "$git_root/CLAUDE.md"
-  sed -i '' "/$RELAY_MARKER/d" "$git_root/CLAUDE.md"
+  # 移除 Agent Relay 相关内容（跨平台兼容）
+  # 使用 awk 删除从 "# Agent Relay" 开始的所有行直到下一个以 # 开头的行之前
+  awk '/^# Agent Relay/{skip=1; next} skip && /^#/{skip=0} !skip' "$git_root/CLAUDE.md" > "$git_root/CLAUDE.md.tmp" && mv "$git_root/CLAUDE.md.tmp" "$git_root/CLAUDE.md"
 
-  # 清理空行和临时文件
-  sed -i '' '/^$/d' "$git_root/CLAUDE.md"
+  # 清理空行
+  sed -i '' '/^$/d' "$git_root/CLAUDE.md" 2>/dev/null || sed -i '/^$/d' "$git_root/CLAUDE.md"
 
   # 如果文件为空或只有标题，删除
   if [[ ! -s "$git_root/CLAUDE.md" ]]; then
@@ -112,6 +114,44 @@ do_uninstall() {
 
   echo ""
   echo "卸载完成！"
+}
+
+do_update() {
+  local target="$1"
+  local git_root
+
+  git_root="$(cd "$target" 2>/dev/null && git rev-parse --show-toplevel 2>/dev/null)" || {
+    echo "错误: $target 不是有效的 git 仓库"
+    exit 1
+  }
+
+  # 检查是否已安装
+  if [[ ! -f "$git_root/CLAUDE.md" ]] || ! grep -q "$RELAY_MARKER" "$git_root/CLAUDE.md" 2>/dev/null; then
+    echo "未安装 Agent Relay，请先运行安装命令"
+    exit 1
+  fi
+
+  echo "目标项目: $git_root"
+  echo "正在更新..."
+
+  # 备份原文件
+  cp "$git_root/CLAUDE.md" "$git_root/CLAUDE.md.bak"
+
+  # 移除旧的 Agent Relay 指令
+  awk '/^# Agent Relay/{skip=1; next} skip && /^#/{skip=0} !skip' "$git_root/CLAUDE.md" > "$git_root/CLAUDE.md.tmp" && mv "$git_root/CLAUDE.md.tmp" "$git_root/CLAUDE.md"
+
+  # 清理空行
+  sed -i '' '/^$/d' "$git_root/CLAUDE.md" 2>/dev/null || sed -i '/^$/d' "$git_root/CLAUDE.md"
+
+  # 添加新的指令
+  if [[ -s "$git_root/CLAUDE.md" ]]; then
+    echo "" >> "$git_root/CLAUDE.md"
+  fi
+  cat "$SCRIPT_DIR/relay-instructions.md" >> "$git_root/CLAUDE.md"
+
+  echo "已更新到最新版本（原文件已备份为 CLAUDE.md.bak）"
+  echo ""
+  echo "更新完成！"
 }
 
 # 主逻辑
@@ -139,6 +179,16 @@ case "${1:-}" in
     fi
     TARGET="$(cd "$TARGET" 2>/dev/null && pwd)" || { echo "路径不存在: $TARGET"; exit 1; }
     check_installed "$TARGET"
+    ;;
+  -U|--update)
+    TARGET="${2:-}"
+    if [[ -z "$TARGET" ]]; then
+      echo "错误: 缺少路径参数"
+      usage
+      exit 1
+    fi
+    TARGET="$(cd "$TARGET" 2>/dev/null && pwd)" || { echo "路径不存在: $TARGET"; exit 1; }
+    do_update "$TARGET"
     ;;
   "")
     echo "错误: 缺少路径参数"
