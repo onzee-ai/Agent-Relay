@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -eo pipefail
 
 # Agent Relay - 一键安装
 # 用法:
@@ -7,6 +7,11 @@ set -euo pipefail
 #   bash install.sh --uninstall /path/to/your-project  # 卸载
 #   bash install.sh --check /path/to/your-project  # 检查状态
 #   bash install.sh --update /path/to/your-project  # 更新到最新版本
+
+# 处理 BASH_SOURCE 在 pipe 模式下可能 unbound 的问题
+if [[ -z "${BASH_SOURCE[0]:-}" ]]; then
+  BASH_SOURCE="$0"
+fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RELAY_MARKER="Agent Relay"
@@ -58,13 +63,24 @@ do_install() {
     return 0
   fi
 
+  # 检查是否有 relay-instructions.md，如果没有则尝试下载
+  local instructions_file="$SCRIPT_DIR/relay-instructions.md"
+  if [[ ! -f "$instructions_file" ]]; then
+    echo "正在从 GitHub 下载 relay-instructions.md..."
+    instructions_file="$git_root/relay-instructions.md"
+    curl -sL "https://raw.githubusercontent.com/onzee-ai/Agent-Relay/main/relay-instructions.md" -o "$instructions_file" || {
+      echo "错误: 无法下载 relay-instructions.md"
+      exit 1
+    }
+  fi
+
   # 复制 CLAUDE.md（如果不存在则创建，如果存在则追加 relay 指令）
   if [[ -f "$git_root/CLAUDE.md" ]]; then
     echo "" >> "$git_root/CLAUDE.md"
-    cat "$SCRIPT_DIR/relay-instructions.md" >> "$git_root/CLAUDE.md"
+    cat "$instructions_file" >> "$git_root/CLAUDE.md"
     echo "已追加 Agent Relay 指令到 CLAUDE.md"
   else
-    cp "$SCRIPT_DIR/relay-instructions.md" "$git_root/CLAUDE.md"
+    cp "$instructions_file" "$git_root/CLAUDE.md"
     echo "已创建 CLAUDE.md"
   fi
 
