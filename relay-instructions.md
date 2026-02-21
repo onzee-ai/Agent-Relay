@@ -347,3 +347,40 @@ fi
 | Cocos 构建失败 | 记录错误到 notes，标记 passes 为 false |
 | 已有项目添加模块 | 仅创建模块目录，不修改原有文件 |
 | 自检超时 | 增加 timeout 或标记为手动验证 |
+
+## Cocos 场景创建限制
+
+### 已知限制
+
+Cocos Creator 场景文件 (.scene) 存在以下创建限制：
+
+1. **UUID 依赖**：场景文件依赖内置资源的 UUID，不知道这些 UUID 无法正确创建
+2. **复杂引用结构**：场景包含 `__id__`、`__type__` 等内部引用
+3. **版本差异**：Cocos 2.x 和 3.x 的 API 有差异（如 `cc.GameManager` 在 3.x 不存在）
+
+### 解决方案
+
+当需要创建 Cocos 场景时：
+
+**方案 1：基于模板复制（推荐）**
+1. 先在 Cocos Editor 中手动创建一个基础场景
+2. 让 AI 分析这个场景的 JSON 结构
+3. 基于该结构修改创建新场景
+
+**方案 2：只创建脚本 + 手动绑定**
+1. AI 只创建 TypeScript 脚本
+2. 在 Cocos Editor 中手动创建场景并绑定脚本
+3. 记录到功能清单中
+
+**方案 3：使用命令行创建**
+```bash
+# Cocos 3.x 命令行创建场景
+cocos scene create --name MyScene --output assets/scenes/
+```
+
+### 工作流调整
+
+当功能需要创建场景时：
+1. 在 steps 中明确标注"需要在 Cocos Editor 中手动创建"
+2. 在 notes 中记录场景需要包含的节点和组件
+3. 将场景创建作为前置步骤，用户手动完成后继续
