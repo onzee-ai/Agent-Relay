@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -eo pipefail
 
 # Agent Relay - 一键安装
 # 用法:
@@ -8,14 +7,21 @@ set -eo pipefail
 #   bash install.sh --check /path/to/your-project  # 检查状态
 #   bash install.sh --update /path/to/your-project  # 更新到最新版本
 
-# 处理 BASH_SOURCE 在 pipe 模式下可能 unbound 的问题
-if [[ -z "${BASH_SOURCE[0]:-}" ]]; then
-  BASH_SOURCE="$0"
+# 处理 pipe 模式下的 BASH_SOURCE 问题
+if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+else
+  # 通过 $0 推断脚本位置
+  case "$0" in
+    */*) SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)" ;;
+    *) SCRIPT_DIR="$(pwd)" ;;
+  esac
 fi
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RELAY_MARKER="Agent Relay"
 RELAY_VERSION="1.0.0"
+
+set -euo pipefail
 
 usage() {
   echo "Agent Relay - 一键安装 (v$RELAY_VERSION)"
