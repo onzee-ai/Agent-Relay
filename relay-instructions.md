@@ -57,6 +57,7 @@
   "version": "1.0.0",
   "created_at": "YYYY-MM-DD",
   "spec_file": "SPEC.md",
+  "commit_lang": "zh",
   "features": [
     {
       "id": "F001",
@@ -99,7 +100,9 @@
 - 遇到的问题：
 - 下一步计划：
 ```
-8. Git 提交：`git add SPEC.md feature-list.json claude-progress.txt && git commit -m "feat(F000): 初始化接力开发项目"`
+8. 询问用户希望后续所有提交使用什么语言（中文或英文），将选择记录到 feature-list.json 的 commit_lang 字段（"zh" 或 "en"），然后使用该语言提交：
+   - 中文：`git add SPEC.md feature-list.json claude-progress.txt && git commit -m "feat(F000): 初始化接力开发项目"`
+   - 英文：`git add SPEC.md feature-list.json claude-progress.txt && git commit -m "feat(F000): Initialize relay development project"`
 
 **功能清单规则：**
 - ID 格式 F001-F999，按顺序递增
@@ -107,6 +110,7 @@
 - 正确设置 dependencies
 - priority 1-5，1 为最高
 - 每个功能必须有明确的 test_criteria
+- 在 feature-list.json 中记录 `commit_lang` 字段（"zh" 或 "en"），后续所有提交都使用该语言
 
 ### 接力开发（后续每次会话）
 
@@ -131,7 +135,10 @@ cat claude-progress.txt
 - 根据 `test_criteria` 逐条验证
 
 **4. 提交并更新：**
-- `git add -A && git commit -m "feat(FXXX): 标题"`
+- 读取 feature-list.json 中的 commit_lang 字段确定提交语言
+- 使用该语言提交，例如：
+  - 中文：`git add -A && git commit -m "feat(FXXX): 功能标题"`
+  - 英文：`git add -A && git commit -m "feat(FXXX): Feature title"`
 - 更新 feature-list.json：`passes` 设为 `true`
 - 更新 claude-progress.txt：记录本次开发的进度和决策
 
