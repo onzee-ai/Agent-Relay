@@ -5,7 +5,9 @@ venv/
 .env
 dist/
 build/
-.next/
+.nexte/
 .DS_Store
 *.swp
 *.swo
+.idea/
+.vscode/
