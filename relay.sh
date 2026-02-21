@@ -78,6 +78,53 @@ check_relay_installed() {
   return 1
 }
 
+# 检查是否为多模块项目
+is_multi_module() {
+  local project_path="$1"
+  local feature_file="$project_path/feature-list.json"
+  if [[ -f "$feature_file" ]]; then
+    local mode
+    mode=$(python3 -c "
+import json
+with open('${feature_file}', 'r') as f:
+    data = json.load(f)
+    print(data.get('mode', 'single'))
+" 2>/dev/null) || echo "single"
+    [[ "$mode" == "multi-module" ]]
+    return $?
+  fi
+  return 1
+}
+
+# 获取模块列表
+list_modules() {
+  local project_path="$1"
+  local feature_file="$project_path/feature-list.json"
+
+  if [[ ! -f "$feature_file" ]]; then
+    log_warn "未找到 feature-list.json"
+    return
+  fi
+
+  python3 -c "
+import json
+with open('${feature_file}', 'r') as f:
+    data = json.load(f)
+    modules = data.get('modules', [])
+    if modules:
+        print('模块列表:')
+        for m in modules:
+            name = m.get('name', '')
+            status = m.get('status', 'pending')
+            completed = m.get('completed_features', 0)
+            total = m.get('total_features', 0)
+            status_icon = {'pending': '○', 'active': '◐', 'completed': '✓'}.get(status, '○')
+            print(f'  {status_icon} {name} ({completed}/{total})')
+    else:
+        print('无模块')
+"
+}
+
 # 显示进度条
 show_progress_bar() {
   local current=$1
@@ -306,11 +353,39 @@ cmd_progress() {
   echo ""
   echo "=== $current 进度 ==="
 
-  if [[ -f "$path/feature-list.json" ]]; then
-    format_features "$path"
-  else
+  if [[ ! -f "$path/feature-list.json" ]]; then
     log_warn "未找到 feature-list.json，请先初始化项目"
     return
+  fi
+
+  # 检查是否为多模块项目
+  if is_multi_module "$path"; then
+    echo ""
+    echo "项目模式: 多模块"
+    echo ""
+    list_modules "$path"
+
+    # 计算总体进度
+    python3 -c "
+import json
+with open('${path}/feature-list.json', 'r') as f:
+    data = json.load(f)
+    modules = data.get('modules', [])
+    total = sum(m.get('total_features', 0) for m in modules)
+    completed = sum(m.get('completed_features', 0) for m in modules)
+    if total > 0:
+        percent = int(completed * 100 / total)
+        bar_len = 20
+        filled = int(bar_len * completed / total)
+        print()
+        print(f'总体进度: [{\"█\" * filled}{\"░\" * (bar_len - filled)}] {percent}% ({completed}/{total} 功能)')
+"
+    echo ""
+    echo "提示: 进入模块目录查看详细进度: cd modules/<模块名>"
+  else
+    echo ""
+    echo "项目模式: 单项目"
+    format_features "$path"
   fi
 
   echo ""
